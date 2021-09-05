@@ -1,5 +1,5 @@
 INSERT INTO department (id, deparment_name)
-VALUES ()
+VALUES (7, 'dano')
 
 INSERT INTO employee_roll(id, title, salary, deparment_id)
 Values ()
