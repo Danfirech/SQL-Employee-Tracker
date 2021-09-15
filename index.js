@@ -6,7 +6,7 @@ let con = mysql.createConnection({
   host: "localhost",
   port: 3306,
   user: "root",
-  password: "password",
+  password: "password1",
   database: "tracker_db",
 });
 
