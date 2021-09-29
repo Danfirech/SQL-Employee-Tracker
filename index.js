@@ -1,6 +1,8 @@
 const inquirer = require("inquirer");
 const mysql = require("mysql2");
-const cTable = require("console.table");
+const { title } = require("process");
+const util = require("util");
+// const cTable = require("console.table");
 
 let con = mysql.createConnection({
   host: "localhost",
@@ -10,16 +12,18 @@ let con = mysql.createConnection({
   database: "tracker_db",
 });
 
+con.query = util.promisify(con.query);
+
 con.connect((error) => {
   if (error) {
     console.log("error", error);
   } else {
-    console.log("success");
+    askQuestion();
   }
 });
 
 async function askQuestion() {
-  const results = await inquirer.prompt([
+  const { questionStart } = await inquirer.prompt([
     {
       type: "list",
       name: "questionStart",
@@ -37,20 +41,165 @@ async function askQuestion() {
     },
   ]);
 
-  if (results.questionStart === "view all departments") {
+  if (questionStart === "view all departments") {
     viewDepartments();
+  } else if (questionStart === "view all roles") {
+    viewRolls();
+  } else if (questionStart === "view all employees") {
+    viewEmployee();
+  } else if (questionStart === "add a department") {
+    addDepartment();
+  } else if (questionStart === "add a role") {
+    addRoll();
+  } else if (questionStart === "add an employee") {
+    addEmployee();
+  } else if (questionStart === "update an employee role") {
+    updateEmployee();
+  }
+
+  function viewDepartments() {
+    let qString = "select * from department;";
+    con.query(qString, function (error, res) {
+      if (error) {
+        console.log("error");
+      } else {
+        console.table(res);
+      }
+    });
+  }
+
+  function viewRolls() {
+    let qString = "select * from employee_roll;";
+    con.query(qString, function (error, res) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.table(res);
+      }
+    });
+  }
+
+  function viewEmployee() {
+    // let qString = `select manager. employee.id, employee.first_name, employee.last_name, employee_roll.title, employee_roll.salary
+    //   from employee_roll
+    //   inner join employee on employee.role_id = employee_roll.id
+    //    ;`;
+
+    let qString = "select * from employee";
+
+    con.query(qString, function (error, res) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.table(res);
+      }
+    });
+  }
+
+  async function addDepartment() {
+    const { departmentName } = await inquirer.prompt([
+      {
+        type: "input",
+        name: "departmentName",
+        message: "What department would you like to add?",
+      },
+    ]);
+
+    let qString = "insert into department set ?";
+    con.query(
+      qString,
+      { department_name: departmentName },
+      function (error, res) {
+        if (error) {
+          console.log(error);
+        } else {
+          console.table(res);
+        }
+      }
+    );
+  }
+
+  async function addRoll() {
+    const { departmentRoll } = await inquirer.prompt([
+      {
+        type: "confirm",
+        name: "departmentRoll",
+        message: "Would you like to add a roll?",
+      },
+    ]);
+
+    let qString = "insert into employee_roll set ?";
+    con.query(qString, { title: departmentRoll }, function (error, res) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.table(res);
+      }
+    });
+  }
+
+  async function addEmployee() {
+    const { employeeRoll } = await inquirer.prompt([
+      {
+        type: "input",
+        name: "departmentRoll",
+        message: "Please type the name of the Employee you would like to add?",
+      },
+    ]);
+
+    let qString = "insert into employee set ?";
+    con.query(qString, { first_name: employeeRoll }, function (error, res) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.table(res);
+      }
+    });
+  }
+
+  // UPDATE EMPLOYEE
+
+  async function updateEmployee() {
+    let allEmployees = await con.query("select * from employee");
+    let allRolls = await con.query("select * from employee_roll");
+
+    const employeeChoices = allEmployees.map((person) => {
+      return {
+        name: `${person.first_name} ${person.last_name}`,
+        value: person.id,
+      };
+    });
+
+    const rollChoices = allRolls.map((roll) => {
+      return {
+        name: roll.title,
+        value: roll.id,
+      };
+    });
+
+    const { employeeId, rollId } = await inquirer.prompt([
+      {
+        type: "list",
+        name: "employeeId",
+        message: "What employee would you like to upate?",
+        choices: employeeChoices,
+      },
+
+      {
+        type: "list",
+        name: "rollId",
+        message: "What employee Roll would you like to upate?",
+        choices: rollChoices,
+      },
+    ]);
+
+    let qString = "update employee set role_id = ? where id = ?";
+    con.query(qString, [rollId, employeeId], function (error, res) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log("update was succesfull!");
+      }
+    });
   }
 }
-
-function viewDepartments() {
-  let qString = "select * from department;";
-  con.query(qString, function (error, res) {
-    if (error) {
-      console.log("error");
-    } else {
-      console.table(res);
-    }
-  });
-}
-
-askQuestion();
