@@ -50,7 +50,7 @@ async function askQuestion() {
   } else if (questionStart === "add a department") {
     addDepartment();
   } else if (questionStart === "add a role") {
-    addRoll();
+    addRole();
   } else if (questionStart === "add an employee") {
     addEmployee();
   } else if (questionStart === "update an employee role") {
@@ -119,24 +119,40 @@ async function askQuestion() {
     );
   }
 
-  async function addRoll() {
-    const { departmentRoll } = await inquirer.prompt([
-      {
-        type: "confirm",
-        name: "departmentRoll",
-        message: "Would you like to add a roll?",
-      },
-    ]);
+  // Add Role
 
-    let qString = "insert into employee_roll set ?";
-    con.query(qString, { title: departmentRoll }, function (error, res) {
-      if (error) {
-        console.log(error);
-      } else {
-        console.table(res);
-      }
-    });
+  function addRole() {
+    inquirer
+      .prompt([
+        {
+          type: "input",
+          name: "roleName",
+          message: "What is the name of the role?",
+        },
+        {
+          type: "input",
+          name: "salary",
+          message: "What is the salary?",
+        },
+        {
+          type: "input",
+          name: "departId",
+          message: "What is the department id?",
+        },
+      ])
+      .then(function (answer) {
+        con.query(
+          `INSERT INTO role (title, salary, department_id) VALUES('${answer.roleName}', '${answer.salary}', '${answer.departId}')`,
+          function (err, res) {
+            if (err) throw err;
+            console.table(res);
+            askQuestion();
+          }
+        );
+      });
   }
+
+  //Add Employee
 
   function addEmployee() {
     inquirer
