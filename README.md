@@ -22,6 +22,10 @@ So that I can organize and plan my business
 
 https://danfirech.github.io/SQL-Employee-Tracker/
 
+## Demo
+
+https://watch.screencastify.com/v/wkpbSW7h0HyxC1CudMoR
+
 ## Author
 
 Dan Possehl
