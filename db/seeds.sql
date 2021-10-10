@@ -1,7 +1,7 @@
 
 INSERT INTO department (department_name) 
-VALUES ("Department 1")
-("Department 2")
+VALUES ("Department 1"),
+("Department 2");
 
 
 INSERT INTO employee_roll(title, salary, department_id)

@@ -138,23 +138,40 @@ async function askQuestion() {
     });
   }
 
-  async function addEmployee() {
-    const { employeeRoll } = await inquirer.prompt([
-      {
-        type: "input",
-        name: "departmentRoll",
-        message: "Please type the name of the Employee you would like to add?",
-      },
-    ]);
-
-    let qString = "insert into employee set ?";
-    con.query(qString, { first_name: employeeRoll }, function (error, res) {
-      if (error) {
-        console.log(error);
-      } else {
-        console.table(res);
-      }
-    });
+  function addEmployee() {
+    inquirer
+      .prompt([
+        {
+          type: "input",
+          name: "firstName",
+          message: "What is the employee's first name?",
+        },
+        {
+          type: "input",
+          name: "lastName",
+          message: "What is the employee's last name?",
+        },
+        {
+          type: "input",
+          name: "roleId",
+          message: "What is the employee role id?",
+        },
+        {
+          type: "input",
+          name: "managerId",
+          message: "What is the manager id?",
+        },
+      ])
+      .then(function (answer) {
+        con.query(
+          `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES('${answer.firstName}', '${answer.lastName}', '${answer.roleId}', '${answer.managerId}' )`,
+          function (err, res) {
+            if (err) throw err;
+            console.table(res);
+            askQuestion();
+          }
+        );
+      });
   }
 
   // UPDATE EMPLOYEE
